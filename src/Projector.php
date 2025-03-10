@@ -50,6 +50,12 @@ class Projector
         return (new $this->projectionName())->key($this->projectedModel);
     }
 
+
+    private function sanitizedProjectionName(): string
+    {
+        return str_replace("\\", "\\\\", $this->projectionName);
+    }
+    
     /**
      * Is the given period a global one or not.
      */
@@ -88,7 +94,7 @@ class Projector
     private function findGlobalProjection(): Projection|null
     {
         return Projection::firstWhere([
-            ['projection_name', $this->projectionName],
+            ['projection_name', $this->sanitizedProjectionName()],
             ['key', $this->hasKey() ? $this->key() : null],
             ['period', '*'],
             ['start_date', null],
@@ -101,7 +107,7 @@ class Projector
     private function findProjection(string $period): Projection|null
     {
         return Projection::firstWhere([
-            ['projection_name', $this->projectionName],
+            ['projection_name', $this->sanitizedProjectionName()],
             ['key', $this->hasKey() ? $this->key() : null],
             ['period', $period],
             ['start_date', app(TimeSeries::class)->resolveFloorDate($this->projectedModel->created_at, $period)],
